@@ -59,8 +59,8 @@
     _showHUD = NO;
     _timeoutInterval = 10.;
     _manager = [AFHTTPSessionManager manager];
-    _manager.responseSerializer = [AFJSONResponseSerializer serializer];
-    _manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/json", @"text/html",nil];
+    _manager.responseSerializer = [self responseSerializer];
+    _manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/json", @"text/html", @"application/javascript" ,nil];
     if (kOpenHttpsAuth) {
         [_manager setSecurityPolicy:[self customSecurityPolicy]];
     }
@@ -232,6 +232,33 @@
     return requestSerializer;
 }
 
+- (AFHTTPResponseSerializer *)responseSerializer {
+    
+    AFHTTPResponseSerializer *response = nil;
+    switch ([self responseSerializerType]) {
+        case MTResponseSerializerTypeHTTP:
+            
+            response = [AFHTTPResponseSerializer serializer];
+            break;
+            
+        case MTResponseSerializerTypeJSON:
+            
+            response = [AFJSONResponseSerializer serializer];
+            break;
+            
+        case MTResponseSerializerTypeXMLParser:
+            
+            response = [AFXMLParserResponseSerializer serializer];
+            break;
+            
+        default:
+            break;
+    }
+    response.acceptableContentTypes = [NSSet setWithObjects:@"application/json",@"text/json", @"text/html", @"application/javascript" ,nil];
+    
+    return response;
+}
+
 - (void)requestDidFailWithRequest:(NSURLRequest *)request error:(NSError *)error {
         DLog(@"Request %@ failed, status code = %ld, error = %@",NSStringFromClass([request class]), (long)error.code, error.localizedDescription);
 }
@@ -248,7 +275,7 @@
     NSHTTPURLResponse *res = (NSHTTPURLResponse *)response;
     NSInteger statusCode = res.statusCode;
     NSString *status_str = [NSHTTPURLResponse localizedStringForStatusCode:res.statusCode];
-    [SVProgressHUD showWithStatus:[NSString stringWithFormat:@"HTTP状态码:%ld-->状态码描述：%@", statusCode, status_str]];
+//    [SVProgressHUD showWithStatus:[NSString stringWithFormat:@"HTTP状态码:%ld-->状态码描述：%@", statusCode, status_str]];
 #endif
 #endif
     
@@ -276,7 +303,6 @@
         } else {
             [SVProgressHUD dismiss];
         }
-        _showHUD = NO;
     }
     else {
         id json = [self preHandleData:responseObject error:error];
@@ -290,7 +316,7 @@
             }
             else {
                 NSDictionary *jsonDict = (NSDictionary *)json;
-                id resultData = [jsonDict objectForKey:@"data"];
+                id resultData = jsonDict;//[jsonDict objectForKey:@"data"];
                 NSInteger errorCode = [[jsonDict objectForKey:@"error"] integerValue];
                 DLog(@"jsonData:%@", jsonDict);
                 if (resultData) {
@@ -306,7 +332,6 @@
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [SVProgressHUD dismiss];
             });
-            _showHUD = NO;
         }
     }
     
@@ -321,7 +346,7 @@
         return error.localizedFailureReason;
     }
     
-    return nil;
+    return data;
 /*
     此处可以自定义对回调响应的解析,例如:
     NSDictionary *jsonDict = (NSDictionary *)data;
