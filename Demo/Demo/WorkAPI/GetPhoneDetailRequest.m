@@ -22,7 +22,7 @@
 
 - (id)handleData:(id)data errCode:(NSInteger)resCode {
     
-    return data;
+    return [NSString stringWithFormat:@"返回了处理后的数据，原始数据是：%@", data];
 }
 
 @end

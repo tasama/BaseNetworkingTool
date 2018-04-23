@@ -10,7 +10,15 @@
 
 @implementation DemoBaseRequest
 
-//http://tcc.taobao.com/cc/json/mobile_tel_segment.htm?tel=手机号
+- (instancetype)init {
+    
+    if (self = [super init]) {
+        
+        self.showHUD = YES;
+    }
+    return self;
+}
+
 - (NSString *)commonNetworkDomain {
     
     return @"https://api.douban.com/";

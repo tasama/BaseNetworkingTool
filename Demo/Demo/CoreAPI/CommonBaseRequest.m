@@ -272,9 +272,9 @@
 #ifdef DEBUG //处于开发阶段
 #if TARGET_IPHONE_SIMULATOR
     //iPhone Simulator
-    NSHTTPURLResponse *res = (NSHTTPURLResponse *)response;
-    NSInteger statusCode = res.statusCode;
-    NSString *status_str = [NSHTTPURLResponse localizedStringForStatusCode:res.statusCode];
+//    NSHTTPURLResponse *res = (NSHTTPURLResponse *)response;
+//    NSInteger statusCode = res.statusCode;
+//    NSString *status_str = [NSHTTPURLResponse localizedStringForStatusCode:res.statusCode];
 //    [SVProgressHUD showWithStatus:[NSString stringWithFormat:@"HTTP状态码:%ld-->状态码描述：%@", statusCode, status_str]];
 #endif
 #endif
@@ -289,7 +289,6 @@
             DLog(@"_+_+%@+_+%@", data, errString);
         }
         
-        _showHUD = YES;
         if (self.failureBlock) {
             self.failureBlock(error);
         }
@@ -300,8 +299,6 @@
         
         if (_showHUD) {
             [SVProgressHUD showErrorWithStatus:@"网络连接失败"];
-        } else {
-            [SVProgressHUD dismiss];
         }
     }
     else {
@@ -328,11 +325,9 @@
             }
         }
         
-        if (_showHUD) {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [SVProgressHUD dismiss];
-            });
-        }
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [SVProgressHUD dismiss];
+        });
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
